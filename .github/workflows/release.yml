@@ -24,7 +24,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           repository: bjakym/gh-reusable-wf
-          path: gh-reusable-wf
+          path: /tmp/gh-reusable-wf
           ref: main
           sparse-checkout: |
             .releaserc.yml
@@ -34,6 +34,7 @@ jobs:
 
       - name: List Files for both Repositories
         run: |
+          ls -la /tmp/gh-reusable-wf
           ls -la
 
       # - name: Install Node.js 20.x
