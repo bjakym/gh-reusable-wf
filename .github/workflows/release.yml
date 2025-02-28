@@ -1,0 +1,36 @@
+name: Release
+
+on: 
+  workflow_call: {}  
+
+permissions:
+  contents: write
+  pull-requests: write
+  security-events: write
+  actions: write
+  id-token: write
+  issues: write
+
+jobs:
+  publish-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Node.js 20.x
+        run: |
+          curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+          node -v
+          npm -v
+
+      - name: Publish Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Ensure this token has write access to the repository
+        run: |
+          echo "Installing semantic release plug-ins ..."
+          npm install @semantic-release/git @semantic-release/github @semantic-release/changelog @semantic-release/exec
+          npm install --save @commitlint/cli @commitlint/config-conventional conventional-changelog-conventionalcommits conventional-changelog-eslint conventional-changelog-writer
+          echo "Running semantic release ..."
+          npx semantic-release --debug
