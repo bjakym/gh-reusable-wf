@@ -13,6 +13,7 @@ permissions:
 
 jobs:
   publish-release:
+    name: Execute Release Steps
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
