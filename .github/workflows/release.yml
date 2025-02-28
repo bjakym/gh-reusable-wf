@@ -3,15 +3,13 @@ name: Release
 on: 
   workflow_call: {}  
 
-# permissions:
-#   contents: write
-#   pull-requests: write
-#   security-events: write
-#   actions: write
-#   id-token: write
-#   issues: write
-
-permissions: write-all
+permissions:
+  contents: write
+  pull-requests: write
+  security-events: write
+  actions: write
+  id-token: write
+  issues: write
 
 jobs:
   publish-release:
