@@ -13,33 +13,25 @@ permissions:
 
 jobs:
   publish-release:
-    name: Execute Release Steps
+    name: Execute Steps
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Checkout .release.yml
+      - name: Install Node.js 20.x
         run: |
-          ls -lart
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-          git clone https://github.com/bjakym/gh-reusable-wf.git
-          ls -lart
+          curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+          sudo apt-get install -y nodejs
+          node -v
+          npm -v
 
-      # - name: Install Node.js 20.x
-      #   run: |
-      #     curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-      #     sudo apt-get install -y nodejs
-      #     node -v
-      #     npm -v
-
-      # - name: Publish Semantic Release
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Ensure this token has write access to the repository
-      #   run: |
-      #     echo "Installing semantic release plug-ins ..."
-      #     npm install @semantic-release/git @semantic-release/github @semantic-release/changelog @semantic-release/exec
-      #     npm install --save @commitlint/cli @commitlint/config-conventional conventional-changelog-conventionalcommits conventional-changelog-eslint conventional-changelog-writer
-      #     echo "Running semantic release ..."
-      #     npx semantic-release --debug
+      - name: Publish Semantic Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Ensure this token has write access to the repository
+        run: |
+          echo "Installing semantic release plug-ins ..."
+          npm install @semantic-release/git @semantic-release/github @semantic-release/changelog @semantic-release/exec
+          npm install --save @commitlint/cli @commitlint/config-conventional conventional-changelog-conventionalcommits conventional-changelog-eslint conventional-changelog-writer
+          echo "Running semantic release ..."
+          npx semantic-release --debug
