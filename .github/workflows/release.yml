@@ -35,9 +35,3 @@ jobs:
           npm install --save @commitlint/cli @commitlint/config-conventional conventional-changelog-conventionalcommits conventional-changelog-eslint conventional-changelog-writer
           echo "Running semantic release ..."
           npx semantic-release --debug
-
-      - name: Update Version
-        run: |
-          echo "Updating version ..."
-          npm version patch
-          git push --follow-tags
