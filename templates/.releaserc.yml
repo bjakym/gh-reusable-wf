@@ -82,6 +82,9 @@ plugins:
         fi
   - "@semantic-release/github"
 branches:
+  - "+([0-9])?(.{+([0-9]),x}).x"
   - "main"
-  - name: "alpha"
-    prerelease: true
+  - name: dev
+    prerelease: '${name.replace(/^dev\//g, "dev-")}'
+  - name: hotfix/*
+    prerelease: '${name.replace(/^hotfix\//g, "hotfix-")}'
