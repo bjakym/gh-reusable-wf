@@ -29,11 +29,6 @@ jobs:
     environment: ${{ inputs.environment_name }}
     runs-on: ${{ inputs.runner_label }}
 
-    env:
-      github_org: kyndryl-global-delivery
-      export_repo_name: pa-kstp-exports
-      playbook_folder: playbooks
-
     steps:
       # Checkout the repository
       - name: Checkout
@@ -61,6 +56,6 @@ jobs:
         run: |
           python ansible-pa.py \
             -v projects/${{ inputs.environment_name }}/user-management/admin \
-            -x '{"use_current_secret": true, "commit_changes": false, "vault_secret_path": "home_lab"}' \
+            -x '{"use_current_secret": true, "commit_changes": false, "vault_secret_path": "home_lab_admin"}' \
             -r plan \
             -f
