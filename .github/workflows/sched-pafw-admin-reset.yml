@@ -1,0 +1,52 @@
+name: 'PAFW Admin Reset'
+
+on:
+  workflow_call:
+    inputs:
+      runner_label:
+        required: true
+        type: string
+      environment_name:
+        required: true
+        type: string
+    secrets:
+      VAULT_MOUNTPOINT_PA_FW_ADMIN:
+        required: true
+      VAULT_PATH_PA_FW_ADMIN:
+        required: true
+      VAULT_KEY_PA_FW_ADMIN_PASSWORD:
+        required: true
+
+defaults:
+  run:
+    shell: bash
+
+permissions: write-all
+
+jobs:
+  execute_pafw_admin_reset:
+    name: 'Execute Reset'
+    environment: ${{ inputs.environment_name }}
+    runs-on: ${{ inputs.runner_label }}
+
+    env:
+      github_org: kyndryl-global-delivery
+      export_repo_name: pa-kstp-exports
+      playbook_folder: playbooks
+
+    steps:
+      # Checkout the repository
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # # Import Vault Secrets
+      # - name: Import Vault Secrets
+      #   uses: hashicorp/vault-action@v2
+      #   with:
+      #     url: ${{ vars.VAULT_ADDR }}
+      #     method: jwt
+      #     role: ${{ vars.VAULT_ROLE }}
+      #     namespace: ${{ vars.VAULT_NAMESPACE }}
+      #     secrets: |
+      #       ${{ secrets.VAULT_PATH_PA_FW }} ${{ secrets.VAULT_KEY_PA_FW_USER }} | PA_FW_USER ;
+      #       ${{ secrets.VAULT_PATH_PA_FW }} ${{ secrets.VAULT_KEY_PA_FW_PASSWORD }} | PA_FW_PASSWORD ;
