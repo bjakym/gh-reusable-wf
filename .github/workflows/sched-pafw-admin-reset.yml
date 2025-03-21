@@ -51,14 +51,16 @@ jobs:
           chmod +x vault_token.sh
           ./vault_token.sh
 
-      # # Import Vault Secrets
-      # - name: Import Vault Secrets
-      #   uses: hashicorp/vault-action@v2
-      #   with:
-      #     url: ${{ vars.VAULT_ADDR }}
-      #     method: jwt
-      #     role: ${{ vars.VAULT_ROLE }}
-      #     namespace: ${{ vars.VAULT_NAMESPACE }}
-      #     secrets: |
-      #       ${{ secrets.VAULT_PATH_PA_FW }} ${{ secrets.VAULT_KEY_PA_FW_USER }} | PA_FW_USER ;
-      #       ${{ secrets.VAULT_PATH_PA_FW }} ${{ secrets.VAULT_KEY_PA_FW_PASSWORD }} | PA_FW_PASSWORD ;
+      # Run the backup script (playbook)
+      - name: Run Playbook
+        id: run_playbook
+        env:
+          VAULT_ADDR: ${{ vars.VAULT_ADDR }}
+          VAULT_NAMESPACE: ${{ vars.VAULT_LOCAL_NAMESPACE }}
+          VAULT_TOKEN: ${{ steps.vault.outputs.VAULT_TOKEN }}
+        run: |
+          python ansible-pa.py \
+            -v projects/${{ inputs.environment_name }}/user-management/admin \
+            -x '{"use_current_secret": true, "commit_changes": false, "vault_secret_path": "home_lab"}' \
+            -r plan \
+            -f
