@@ -56,6 +56,6 @@ jobs:
         run: |
           python ansible-pa.py \
             -v projects/${{ inputs.environment_name }}/user-management/admin \
-            -x '{"use_current_secret": true, "commit_changes": false, "vault_secret_path": "home_lab_admin"}' \
+            -x '{"use_current_secret": true, "commit_changes": true, "vault_secret_path": "home_lab_admin"}' \
             -r apply \
             -f
