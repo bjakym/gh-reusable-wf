@@ -39,6 +39,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Get vault token from jwt
+      - name: Get Vault Token
+        working-directory: .github/scripts
+        id: vault
+        env:
+          VAULT_ADDR: ${{ vars.VAULT_ADDR }}
+          VAULT_NAMESPACE: ${{ vars.VAULT_LOCAL_NAMESPACE }}
+          VAULT_ROLE: ${{ vars.VAULT_ROLE }}
+        run: |
+          chmod +x vault_token.sh
+          ./vault_token.sh
+
       # # Import Vault Secrets
       # - name: Import Vault Secrets
       #   uses: hashicorp/vault-action@v2
