@@ -72,4 +72,5 @@ jobs:
               "vault_password_key": "${{ secrets.VAULT_KEY_PA_FW_ADMIN_PASSWORD }}"
             }' \
             -r apply \
+            -i 1 \
             -f
