@@ -20,6 +20,9 @@ on:
       config_folder:
         required: true
         type: string
+      vault_namespace:
+        required: true
+        type: string
     secrets:
       VAULT_MOUNTPOINT_PA_FW_ADMIN:
         required: true
@@ -51,7 +54,7 @@ jobs:
         id: vault
         env:
           VAULT_ADDR: ${{ vars.VAULT_ADDR }}
-          VAULT_NAMESPACE: ${{ vars.VAULT_LOCAL_NAMESPACE }}
+          VAULT_NAMESPACE: ${{ inputs.vault_namespace }}
           VAULT_ROLE: ${{ vars.VAULT_ROLE }}
         run: |
           chmod +x vault_token.sh
@@ -73,7 +76,7 @@ jobs:
         id: run_playbook
         env:
           VAULT_ADDR: ${{ vars.VAULT_ADDR }}
-          VAULT_NAMESPACE: ${{ vars.VAULT_LOCAL_NAMESPACE }}
+          VAULT_NAMESPACE: ${{ inputs.vault_namespace }}
           VAULT_TOKEN: ${{ steps.vault.outputs.VAULT_TOKEN }}
         run: |
           python ansible-pa.py \
