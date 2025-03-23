@@ -36,6 +36,7 @@ permissions: write-all
 
 jobs:
   execute_pafw_admin_reset:
+    name: 'Execute'
     environment: ${{ inputs.environment_name }}
     runs-on: ${{ inputs.runner_label }}
 
