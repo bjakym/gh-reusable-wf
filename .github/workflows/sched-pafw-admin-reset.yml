@@ -54,18 +54,18 @@ jobs:
         run: |
           # if vault_namespace is 'local', set VAULT_NAMESPACE to vars.VAULT_LOCAL_NAMESPACE
           if [ "${{ inputs.vault_namespace }}" == "local" ]; then
-            echo "VAULT_NAMESPACE=${{ vars.VAULT_LOCAL_NAMESPACE }}" >> $GITHUB_ENV
+            echo "VAULT_NAMESPACE=${{ vars.VAULT_LOCAL_NAMESPACE }}" >> $GITHUB_OUTPUT
           fi
           # if vault_namespace is 'common', set VAULT_NAMESPACE to vars.VAULT_NAMESPACE
           if [ "${{ inputs.vault_namespace }}" == "common" ]; then
-            echo "VAULT_NAMESPACE=${{ vars.VAULT_NAMESPACE }}" >> $GITHUB_ENV
+            echo "VAULT_NAMESPACE=${{ vars.VAULT_NAMESPACE }}" >> $GITHUB_OUTPUT
           fi
           # If VAULT_PATH_PA_FW_ADMIN contains */data in the beginning, remove it
           VAULT_PATH_PA_FW_ADMIN=$(echo "${{ secrets.VAULT_PATH_PA_FW_ADMIN }}" | sed 's/^.*\/data\///')
           echo "VAULT_PATH_PA_FW_ADMIN=${VAULT_PATH_PA_FW_ADMIN}" >> $GITHUB_OUTPUT
           # If VAULT_MOUNTPOINT_PA_FW_ADMIN contains */, remove everything after it
           VAULT_MOUNTPOINT_PA_FW_ADMIN=$(echo "${{ secrets.VAULT_MOUNTPOINT_PA_FW_ADMIN }}" | sed 's/\/.*//')
-          echo "VAULT_MOUNTPOINT_PA_FW_ADMIN=${VAULT_MOUNTPOINT_PA_FW_ADMIN}" >> $GITHUB_OUTPUT   
+          echo "VAULT_MOUNTPOINT_PA_FW_ADMIN=${VAULT_MOUNTPOINT_PA_FW_ADMIN}" >> $GITHUB_OUTPUT
 
       # Get vault token from jwt
       - name: Get Vault Token
