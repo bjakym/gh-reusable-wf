@@ -48,35 +48,43 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Vault Preparation
+      - name: Prepare Vault
+        id: vault_prep
+        run: |
+          # if vault_namespace is 'local', set VAULT_NAMESPACE to vars.VAULT_LOCAL_NAMESPACE
+          if [ "${{ inputs.vault_namespace }}" == "local" ]; then
+            echo "VAULT_NAMESPACE=${{ vars.VAULT_LOCAL_NAMESPACE }}" >> $GITHUB_ENV
+          fi
+          # if vault_namespace is 'common', set VAULT_NAMESPACE to vars.VAULT_NAMESPACE
+          if [ "${{ inputs.vault_namespace }}" == "common" ]; then
+            echo "VAULT_NAMESPACE=${{ vars.VAULT_NAMESPACE }}" >> $GITHUB_ENV
+          fi
+          # If VAULT_PATH_PA_FW_ADMIN contains */data in the beginning, remove it
+          VAULT_PATH_PA_FW_ADMIN=$(echo "${{ secrets.VAULT_PATH_PA_FW_ADMIN }}" | sed 's/^.*\/data\///')
+          echo "VAULT_PATH_PA_FW_ADMIN=${VAULT_PATH_PA_FW_ADMIN}" >> $GITHUB_OUTPUT
+          # If VAULT_MOUNTPOINT_PA_FW_ADMIN contains */, remove everything after it
+          VAULT_MOUNTPOINT_PA_FW_ADMIN=$(echo "${{ secrets.VAULT_MOUNTPOINT_PA_FW_ADMIN }}" | sed 's/\/.*//')
+          echo "VAULT_MOUNTPOINT_PA_FW_ADMIN=${VAULT_MOUNTPOINT_PA_FW_ADMIN}" >> $GITHUB_OUTPUT   
+
       # Get vault token from jwt
       - name: Get Vault Token
         working-directory: .github/scripts
         id: vault
         env:
           VAULT_ADDR: ${{ vars.VAULT_ADDR }}
-          VAULT_NAMESPACE: ${{ inputs.vault_namespace }}
+          VAULT_NAMESPACE: ${{ steps.vault_prep.outputs.VAULT_NAMESPACE }}
           VAULT_ROLE: ${{ vars.VAULT_ROLE }}
         run: |
           chmod +x vault_token.sh
           ./vault_token.sh
-
-      # Prpare vault path and mount point
-      - name: Prepare Vault Path and Mount Point
-        id: vault_path_mountpoint
-        run: |
-          # If VAULT_PATH_PA_FW_ADMIN contains */data in the beginning, remove it
-          VAULT_PATH_PA_FW_ADMIN=$(echo "${{ secrets.VAULT_PATH_PA_FW_ADMIN }}" | sed 's/^.*\/data\///')
-          echo "VAULT_PATH_PA_FW_ADMIN=${VAULT_PATH_PA_FW_ADMIN}" >> $GITHUB_OUTPUT
-          # If VAULT_MOUNTPOINT_PA_FW_ADMIN contains */, remove everything after it
-          VAULT_MOUNTPOINT_PA_FW_ADMIN=$(echo "${{ secrets.VAULT_MOUNTPOINT_PA_FW_ADMIN }}" | sed 's/\/.*//')
-          echo "VAULT_MOUNTPOINT_PA_FW_ADMIN=${VAULT_MOUNTPOINT_PA_FW_ADMIN}" >> $GITHUB_OUTPUT
 
       # Run the backup script (playbook)
       - name: Run Playbook
         id: run_playbook
         env:
           VAULT_ADDR: ${{ vars.VAULT_ADDR }}
-          VAULT_NAMESPACE: ${{ inputs.vault_namespace }}
+          VAULT_NAMESPACE: ${{ steps.vault_prep.outputs.VAULT_NAMESPACE }}
           VAULT_TOKEN: ${{ steps.vault.outputs.VAULT_TOKEN }}
         run: |
           python ansible-pa.py \
@@ -84,8 +92,8 @@ jobs:
             -x '{
               "use_current_secret": ${{ inputs.use_current_secret }},
               "commit_changes": ${{ inputs.commit_changes }},
-              "vault_engine_mount_point": "${{ steps.vault_path_mountpoint.outputs.VAULT_MOUNTPOINT_PA_FW_ADMIN }}",
-              "vault_secret_path": "${{ steps.vault_path_mountpoint.outputs.VAULT_PATH_PA_FW_ADMIN }}",
+              "vault_engine_mount_point": "${{ steps.vault_prep.outputs.VAULT_MOUNTPOINT_PA_FW_ADMIN }}",
+              "vault_secret_path": "${{ steps.vault_prep.outputs.VAULT_PATH_PA_FW_ADMIN }}",
               "vault_password_key": "${{ secrets.VAULT_KEY_PA_FW_ADMIN_PASSWORD }}"
             }' \
             -r apply \
