@@ -9,6 +9,14 @@ on:
       environment_name:
         required: true
         type: string
+      commit_changes:
+        required: true
+        type: boolean
+        default: false
+      use_current_secret:
+        required: true
+        type: boolean
+        default: true
     secrets:
       VAULT_MOUNTPOINT_PA_FW_ADMIN:
         required: true
@@ -25,7 +33,7 @@ permissions: write-all
 
 jobs:
   execute_pafw_admin_reset:
-    name: 'Execute Reset'
+    name: 'Execute Steps'
     environment: ${{ inputs.environment_name }}
     runs-on: ${{ inputs.runner_label }}
 
@@ -56,6 +64,12 @@ jobs:
         run: |
           python ansible-pa.py \
             -v projects/${{ inputs.environment_name }}/user-management/admin \
-            -x '{"use_current_secret": true, "commit_changes": true, "vault_secret_path": "home_lab_admin"}' \
+            -x '{
+              "use_current_secret": ${{ inputs.use_current_secret }},
+              "commit_changes": ${{ inputs.commit_changes }},
+              "vault_engine_mount_point": "${{ secrets.VAULT_MOUNTPOINT_PA_FW_ADMIN }}",
+              "vault_secret_path": "${{ secrets.VAULT_PATH_PA_FW_ADMIN }}",
+              "vault_password_key": "${{ secrets.VAULT_KEY_PA_FW_ADMIN_PASSWORD }}"
+            }' \
             -r apply \
             -f
