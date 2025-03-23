@@ -17,7 +17,7 @@ on:
         required: true
         type: boolean
         default: true
-      confg_folder:
+      config_folder:
         required: true
         type: string
     secrets:
@@ -77,7 +77,7 @@ jobs:
           VAULT_TOKEN: ${{ steps.vault.outputs.VAULT_TOKEN }}
         run: |
           python ansible-pa.py \
-            -v projects/${{ inputs.environment_name }}/${{ inputs.confg_folder }} \
+            -v projects/${{ inputs.environment_name }}/${{ inputs.config_folder }} \
             -x '{
               "use_current_secret": ${{ inputs.use_current_secret }},
               "commit_changes": ${{ inputs.commit_changes }},
