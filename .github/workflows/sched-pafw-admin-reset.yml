@@ -69,7 +69,6 @@ jobs:
 
       # Get vault token from jwt
       - name: Get Vault Token
-        working-directory: .github/scripts
         id: vault
         env:
           VAULT_ADDR: ${{ vars.VAULT_ADDR }}
