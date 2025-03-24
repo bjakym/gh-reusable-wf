@@ -94,7 +94,7 @@ jobs:
           JWT_TOKEN=$(jq -r '.jwt' $token_file)
           # vault write -format=json auth/jwt/login role="$VAULT_ROLE" jwt="$JWT_TOKEN" > $response_file 2>&1
 
-          curl -k -s --request POST --header "X-Vault-Namespace: $VAULT_NAMESPACE" --data "{'jwt':$JWT_TOKEN,'role':$VAULT_ROLE}" ${VAULT_ADDR}/v1/auth/jwt/login
+          curl -k -s --request POST --header "X-Vault-Namespace: $VAULT_NAMESPACE" --data "{\"jwt\":\"$JWT_TOKEN\",\"role\":\"$VAULT_ROLE\"}" ${VAULT_ADDR}/v1/auth/jwt/login
 
           export VAULT_TOKEN=$(
             curl -k -s --request POST \
