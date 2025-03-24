@@ -17,5 +17,8 @@ vault write -format=json auth/jwt/login role="$VAULT_ROLE" jwt="$JWT_TOKEN" > $r
 VAULT_TOKEN=$(cat $response_file | jq -r '.auth.client_token')
 echo "VAULT_TOKEN=${VAULT_TOKEN}" >> $GITHUB_OUTPUT
 
+# Clean up
+rm -f $token_file $response_file
+
 # Mask the token
 echo "::add-mask::$VAULT_TOKEN"
