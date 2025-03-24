@@ -76,24 +76,17 @@ jobs:
           VAULT_NAMESPACE: ${{ steps.vault_prep.outputs.VAULT_NAMESPACE }}
           VAULT_ROLE: ${{ vars.VAULT_ROLE }}
         run: |
-          # chmod +x vault_token.sh
-          # ./vault_token.sh
-
-          # Define the variables for token and response files
+          # Token file
           token_file="token.json"
-          response_file="login_response.json"
 
           # Request the ID token
           curl -sSL -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL" | \
           jq "{ jwt: .value, role: \"$VAULT_ROLE\" }" > $token_file
 
-          # Authenticate with Vault
+          # Get the JWT token
           JWT_TOKEN=$(jq -r '.jwt' $token_file)
 
-          # Authenticate with Vault
-          JWT_TOKEN=$(jq -r '.jwt' $token_file)
-          # vault write -format=json auth/jwt/login role="$VAULT_ROLE" jwt="$JWT_TOKEN" > $response_file 2>&1
-
+          # Authenticate using JWT_TOKEN to get VAULT_TOKEN
           export VAULT_TOKEN=$(
             curl -k -s --request POST \
             --header "X-Vault-Namespace: $VAULT_NAMESPACE" \
@@ -101,34 +94,31 @@ jobs:
             ${VAULT_ADDR}/v1/auth/jwt/login | jq -r '.auth.client_token'
           )
 
-          # VAULT_TOKEN=$(cat $response_file | jq -r '.auth.client_token')
-          echo "VAULT_TOKEN=${VAULT_TOKEN}"
           echo "VAULT_TOKEN=${VAULT_TOKEN}" >> $GITHUB_OUTPUT
 
           # Clean up
-          # rm -f $token_file $response_file
           rm -f $token_file
 
           # Mask the token
-          # echo "::add-mask::$VAULT_TOKEN"
+          echo "::add-mask::$VAULT_TOKEN"
 
-      # # Run the backup script (playbook)
-      # - name: Run Playbook
-      #   id: run_playbook
-      #   env:
-      #     VAULT_ADDR: ${{ vars.VAULT_ADDR }}
-      #     VAULT_NAMESPACE: ${{ steps.vault_prep.outputs.VAULT_NAMESPACE }}
-      #     VAULT_TOKEN: ${{ steps.vault.outputs.VAULT_TOKEN }}
-      #   run: |
-      #     python ansible-pa.py \
-      #       -v projects/${{ inputs.environment_name }}/${{ inputs.config_folder }} \
-      #       -x '{
-      #         "use_current_secret": ${{ inputs.use_current_secret }},
-      #         "commit_changes": ${{ inputs.commit_changes }},
-      #         "vault_engine_mount_point": "${{ steps.vault_prep.outputs.VAULT_MOUNTPOINT_PA_FW_ADMIN }}",
-      #         "vault_secret_path": "${{ steps.vault_prep.outputs.VAULT_PATH_PA_FW_ADMIN }}",
-      #         "vault_password_key": "${{ secrets.VAULT_KEY_PA_FW_ADMIN_PASSWORD }}"
-      #       }' \
-      #       -r apply \
-      #       -i 1 \
-      #       -f
+      # Run the backup script (playbook)
+      - name: Run Playbook
+        id: run_playbook
+        env:
+          VAULT_ADDR: ${{ vars.VAULT_ADDR }}
+          VAULT_NAMESPACE: ${{ steps.vault_prep.outputs.VAULT_NAMESPACE }}
+          VAULT_TOKEN: ${{ steps.vault.outputs.VAULT_TOKEN }}
+        run: |
+          python ansible-pa.py \
+            -v projects/${{ inputs.environment_name }}/${{ inputs.config_folder }} \
+            -x '{
+              "use_current_secret": ${{ inputs.use_current_secret }},
+              "commit_changes": ${{ inputs.commit_changes }},
+              "vault_engine_mount_point": "${{ steps.vault_prep.outputs.VAULT_MOUNTPOINT_PA_FW_ADMIN }}",
+              "vault_secret_path": "${{ steps.vault_prep.outputs.VAULT_PATH_PA_FW_ADMIN }}",
+              "vault_password_key": "${{ secrets.VAULT_KEY_PA_FW_ADMIN_PASSWORD }}"
+            }' \
+            -r apply \
+            -i 1 \
+            -f
